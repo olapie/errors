@@ -1,6 +1,34 @@
 package errors
 
-import "net/http"
+import (
+	"io"
+	"log"
+	"net/http"
+)
+
+func ParseHTTPResponse(resp *http.Response) error {
+	if resp.StatusCode < http.StatusBadRequest {
+		return nil
+	}
+
+	err := &Error{
+		Code:    resp.StatusCode,
+		Message: resp.Status,
+	}
+
+	body, ioErr := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	if ioErr != nil {
+		log.Printf("Cannot read response body: %v\n", err)
+		return nil
+	}
+
+	bodyStr := string(body)
+	if bodyStr != "" {
+		err.Message = bodyStr
+	}
+	return err
+}
 
 func BadRequest(format string, a ...interface{}) *Error {
 	return Format(http.StatusBadRequest, format, a...)
