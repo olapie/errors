@@ -153,3 +153,35 @@ func IsNotExist(err error) bool {
 func IsNilOrNotExist(err error) bool {
 	return err == nil || err.Error() == "nil" || IsNotExist(err)
 }
+
+func Or(errs ...error) error {
+	for _, err := range errs {
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func And(errs ...error) error {
+	for _, err := range errs {
+		if err == nil {
+			return nil
+		}
+	}
+	return errorSlice(errs)
+}
+
+func Combine(errs ...error) error {
+	for i := len(errs) - 1; i >= 0; i-- {
+		if errs[i] == nil {
+			errs = append(errs[:i], errs[i+1:]...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errorSlice(errs)
+}
