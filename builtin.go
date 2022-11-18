@@ -17,7 +17,7 @@ func Is(err, target error) bool {
 	return errors.Is(err, target)
 }
 
-func As(err error, target interface{}) bool {
+func As(err error, target any) bool {
 	return errors.As(err, target)
 }
 
@@ -37,7 +37,7 @@ func Cause(err error) error {
 	return err
 }
 
-func Wrapf(err error, format string, a ...interface{}) error {
+func Wrapf(err error, format string, a ...any) error {
 	if err == nil {
 		return nil
 	}

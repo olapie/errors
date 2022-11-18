@@ -86,7 +86,7 @@ func (e *Error) Respond(ctx context.Context, w http.ResponseWriter) {
 	}
 }
 
-func Format(code int, format string, a ...interface{}) *Error {
+func Format(code int, format string, a ...any) *Error {
 	msg := fmt.Sprintf(format, a...)
 	if msg == "" {
 		msg = http.StatusText(code)
@@ -141,7 +141,7 @@ func GetCode(err error) int {
 		log.Printf("Cannot marshal json: %v", err)
 		return 0
 	}
-	var m map[string]interface{}
+	var m map[string]any
 	jErr = json.Unmarshal(b, &m)
 	if jErr != nil {
 		log.Printf("Cannot unmarshal json: %v", err)
@@ -162,7 +162,7 @@ func GetCode(err error) int {
 // Copyright 2011 The Go Authors. All rights reserved.
 // indirect returns the value, after dereferencing as many times
 // as necessary to reach the base type (or nil).
-func indirect(a interface{}) interface{} {
+func indirect(a any) any {
 	if a == nil {
 		return nil
 	}
