@@ -4,7 +4,21 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 )
+
+var textTypes = []string{
+	"text/plain", "text/html", "text/xml", "text/css", "application/xml", "application/xhtml+xml",
+}
+
+func isText(mimeType string) bool {
+	for _, t := range textTypes {
+		if strings.HasPrefix(mimeType, t) {
+			return true
+		}
+	}
+	return false
+}
 
 func ParseHTTPResponse(resp *http.Response) error {
 	if resp.StatusCode < http.StatusBadRequest {
@@ -14,6 +28,11 @@ func ParseHTTPResponse(resp *http.Response) error {
 	err := &Error{
 		Code:    resp.StatusCode,
 		Message: resp.Status,
+	}
+
+	contentType := resp.Header.Get("Content-Type")
+	if !isText(contentType) {
+		return err
 	}
 
 	body, ioErr := io.ReadAll(resp.Body)
