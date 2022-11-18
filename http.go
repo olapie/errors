@@ -7,19 +7,6 @@ import (
 	"strings"
 )
 
-var textTypes = []string{
-	"text/plain", "text/html", "text/xml", "text/css", "application/xml", "application/xhtml+xml",
-}
-
-func isText(mimeType string) bool {
-	for _, t := range textTypes {
-		if strings.HasPrefix(mimeType, t) {
-			return true
-		}
-	}
-	return false
-}
-
 func ParseHTTPResponse(resp *http.Response) error {
 	if resp.StatusCode < http.StatusBadRequest {
 		return nil
@@ -191,4 +178,17 @@ func NotExtended(format string, a ...interface{}) *Error {
 
 func NetworkAuthenticationRequired(format string, a ...interface{}) *Error {
 	return Format(http.StatusNetworkAuthenticationRequired, format, a...)
+}
+
+var textTypes = []string{
+	"text/plain", "text/html", "text/xml", "text/css", "application/xml", "application/xhtml+xml",
+}
+
+func isText(mimeType string) bool {
+	for _, t := range textTypes {
+		if strings.HasPrefix(mimeType, t) {
+			return true
+		}
+	}
+	return false
 }

@@ -87,9 +87,13 @@ func (e *Error) Respond(ctx context.Context, w http.ResponseWriter) {
 }
 
 func Format(code int, format string, a ...interface{}) *Error {
+	msg := fmt.Sprintf(format, a...)
+	if msg == "" {
+		msg = http.StatusText(code)
+	}
 	return &Error{
 		Code:    code,
-		Message: fmt.Sprintf(format, a...),
+		Message: msg,
 	}
 }
 
