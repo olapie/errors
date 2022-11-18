@@ -17,6 +17,26 @@ func Is(err, target error) bool {
 	return errors.Is(err, target)
 }
 
+// IsOf returns true if err can be unwrapped to T
+func IsOf[T error](err error) bool {
+	var zero T
+	if Is(err, zero) {
+		return true
+	}
+
+	for {
+		if _, ok := err.(T); ok {
+			return true
+		}
+		u, ok := err.(interface{ Unwrap() error })
+		if !ok {
+			break
+		}
+		err = u.Unwrap()
+	}
+	return false
+}
+
 func As(err error, target any) bool {
 	return errors.As(err, target)
 }
