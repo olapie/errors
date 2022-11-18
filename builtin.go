@@ -37,6 +37,22 @@ func Cause(err error) error {
 	return err
 }
 
+// CauseOf returns error of type T if it's a cause
+func CauseOf[T error](err error) (T, bool) {
+	for {
+		if v, ok := err.(T); ok {
+			return v, true
+		}
+		u, ok := err.(interface{ Unwrap() error })
+		if !ok {
+			break
+		}
+		err = u.Unwrap()
+	}
+	var zero T
+	return zero, false
+}
+
 func Wrapf(err error, format string, a ...any) error {
 	if err == nil {
 		return nil
