@@ -12,9 +12,11 @@ import (
 	"reflect"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
-var errorRegexp = regexp.MustCompile(`code=([\d]+), message=(.*)`)
+var errorRegexp1 = regexp.MustCompile(`^code:(\d+)$`)
+var errorRegexp2 = regexp.MustCompile(`^code:(\d+), message:(.*)$`)
 
 type Error struct {
 	Code    int    `json:"code"`
@@ -22,7 +24,18 @@ type Error struct {
 }
 
 func FromString(s string) *Error {
-	texts := errorRegexp.FindStringSubmatch(s)
+	s = strings.TrimSpace(s)
+	texts := errorRegexp1.FindStringSubmatch(s)
+	if len(texts) == 2 {
+		code, err := strconv.ParseInt(texts[1], 0, 64)
+		if err == nil {
+			return &Error{
+				Code: int(code),
+			}
+		}
+	}
+
+	texts = errorRegexp2.FindStringSubmatch(s)
 	if len(texts) != 3 {
 		return nil
 	}
@@ -43,7 +56,21 @@ func (e *Error) String() string {
 }
 
 func (e *Error) Error() string {
-	return fmt.Sprintf("code=%d, message=%s", e.Code, e.Message)
+	if e.Message == "" {
+		return fmt.Sprintf("code:%d", e.Code)
+	}
+	return fmt.Sprintf("code:%d, message:%s", e.Code, e.Message)
+}
+
+func (e *Error) Is(target error) bool {
+	if e == target {
+		return true
+	}
+
+	if t, ok := target.(*Error); ok {
+		return t.Code == e.Code && t.Message == e.Message
+	}
+	return false
 }
 
 func (e *Error) Respond(ctx context.Context, w http.ResponseWriter) {

@@ -7,33 +7,54 @@ import (
 )
 
 func TestFromString(t *testing.T) {
-	err := errors.FromString("code=1, message=hello")
-	if err == nil || err.Code != 1 || err.Message != "hello" {
-		t.Fail()
-		return
-	}
+	t.Run("good", func(t *testing.T) {
+		cases := map[string]*errors.Error{
+			"code:1, message:hello": &errors.Error{
+				Code:    1,
+				Message: "hello",
+			},
+			" code:1, message:": &errors.Error{
+				Code: 1,
+			},
+			"code:11": &errors.Error{
+				Code: 11,
+			},
+			"code:10, message:ha ha": &errors.Error{
+				Code:    10,
+				Message: "ha ha",
+			},
+		}
 
-	err = errors.FromString("code=, message=")
-	if err != nil {
-		t.Fail()
-		return
-	}
+		for s, e := range cases {
+			err := errors.FromString(s)
+			if err == nil {
+				t.Fatal(s)
+			}
 
-	err = errors.FromString("code=1, message=")
-	if err == nil || err.Code != 1 || err.Message != "" {
-		t.Fail()
-		return
-	}
+			t.Log(err)
 
-	err = errors.FromString("code=1.1, message=")
-	if err != nil {
-		t.Fail()
-		return
-	}
+			if err.Code != e.Code {
+				t.Fatalf("%s %v", s, err)
+			}
 
-	err = errors.FromString("code=10, message=ha ha")
-	if err == nil || err.Code != 10 || err.Message != "ha ha" {
-		t.Fail()
-		return
-	}
+			if err.Message != e.Message {
+				t.Fatalf("%s %v", s, err)
+			}
+		}
+	})
+
+	t.Run("bad", func(t *testing.T) {
+		cases := []string{
+			"code:, message:",
+			"code:1.1, message:",
+			"s code:1, message:",
+		}
+
+		for _, s := range cases {
+			err := errors.FromString(s)
+			if err != nil {
+				t.Fatal(s)
+			}
+		}
+	})
 }
