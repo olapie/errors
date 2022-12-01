@@ -9,17 +9,17 @@ import (
 func TestFromString(t *testing.T) {
 	t.Run("good", func(t *testing.T) {
 		cases := map[string]*errors.Error{
-			"code:1, message:hello": &errors.Error{
+			"code:1, message:hello": {
 				Code:    1,
 				Message: "hello",
 			},
-			" code:1, message:": &errors.Error{
+			" code:1, message:": {
 				Code: 1,
 			},
-			"code:11": &errors.Error{
+			"code:11": {
 				Code: 11,
 			},
-			"code:10, message:ha ha": &errors.Error{
+			"code:10, message:ha ha": {
 				Code:    10,
 				Message: "ha ha",
 			},
@@ -57,4 +57,12 @@ func TestFromString(t *testing.T) {
 			}
 		}
 	})
+}
+
+func TestErrorString(t *testing.T) {
+	err := errors.Conflict("duplicate nickname")
+	t.Log(err.Error())
+	if err.Error() != "code:409, message:duplicate nickname" {
+		t.Fail()
+	}
 }
