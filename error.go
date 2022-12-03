@@ -178,7 +178,10 @@ func indirect(a any) any {
 }
 
 func IsNotExist(err error) bool {
-	return Is(err, NotExist) || Is(err, sql.ErrNoRows) || Is(err, os.ErrNotExist)
+	return Is(err, NotExist) ||
+		Is(err, sql.ErrNoRows) ||
+		Is(err, os.ErrNotExist) ||
+		GetCode(err) == http.StatusNotFound
 }
 
 func IsNilOrNotExist(err error) bool {
