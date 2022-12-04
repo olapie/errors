@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"encoding/json"
 	"io"
 	"log"
 	"net/http"
@@ -27,6 +28,19 @@ func ParseHTTPResponse(resp *http.Response) error {
 	if ioErr != nil {
 		log.Printf("Cannot read response body: %v\n", err)
 		return nil
+	}
+
+	if strings.HasPrefix(contentType, "application/json") {
+		if json.Unmarshal(body, err) == nil {
+			if err.Code == 0 {
+				err.Code = resp.StatusCode
+			}
+
+			if err.Message == "" {
+				err.Message = resp.Status
+			}
+			return err
+		}
 	}
 
 	bodyStr := string(body)
